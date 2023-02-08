@@ -1,3 +1,33 @@
+// Validation helpers
+interface Validatable  {
+    value: string | number;
+    required?: boolean,
+    minLength?: number,
+    maxLength?: number,
+    min?: number,
+    max?: number,
+}
+
+function validate(validatableInput: Validatable) {
+    let isValid = true;
+    if(validatableInput.required) {
+        isValid = isValid && validatableInput.value.toString().trim().length != 0
+    }
+    if(validatableInput.minLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && validatableInput.value.toString().length >= validatableInput.minLength
+    }
+    if(validatableInput.maxLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && validatableInput.value.toString().length <= validatableInput.maxLength
+    }
+    if(validatableInput.min != null) {
+        isValid = isValid && +validatableInput.value >= validatableInput.min
+    }
+    if(validatableInput.max != null) {
+        isValid = isValid && +validatableInput.value <= validatableInput.max
+    }
+    return isValid;
+}
+
 // Autobind decorator
 function Autobind(target: any, methodName: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
@@ -40,8 +70,26 @@ class ProjectInput {
         const description = this.descriptionInputElement.value;
         const people = this.peopleInputElement.value;
 
-        if(title.trim().length === 0 || description.trim().length === 0 || people.trim().length ===0) {
-            alert('Invalid inputs!, Please find in correct details');
+        const titleValidatable: Validatable = {
+            value: title,
+            required: true,
+        }
+
+        const descValidatable: Validatable = {
+            value: description,
+            required: true,
+            minLength: 5
+        }
+
+        const peopleValidatable: Validatable = {
+            value: people,
+            required: true,
+            min: 2,
+            max: 5
+        }
+
+        if(!validate(titleValidatable) || !validate(descValidatable) || !validate(peopleValidatable)) {
+            alert('Invalid inputs!');
             return
         } else {
             return [title, description, +people]
